@@ -2,7 +2,6 @@
   "name": "lottery",
   "version": "1.0.0",
   "description": "大乐透中奖查询",
-  "type": "module",
   "scripts": {
     "build": "node ./eng/build.js",
     "build:layer": "./eng/layer/build.sh"
@@ -14,7 +13,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.17.17",
-    "eslint": "^8.38.0",
+    "eslint": "^8.39.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^15.7.0",

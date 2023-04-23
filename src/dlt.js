@@ -1,5 +1,6 @@
 const axios = require('axios')
 const { executeQuery } = require('./mysql')
+const tencentcloud = require('./tencent.cloud')
 
 class DLT {
   async sync () {
@@ -7,6 +8,8 @@ class DLT {
     const data = await this.findByPeriod(lotteryDrawNum)
 
     if (data) {
+      // 防止多次触发
+      await this.#setRetryTriggerStatus(false)
       return
     }
 
@@ -16,12 +19,13 @@ class DLT {
     const url = drawPdfUrl
 
     if (!period || !result || !time || !url) {
-      // TODO: retry
+      await this.#setRetryTriggerStatus(true)
       return
     }
 
     await this.create(period, result, time, url)
     await this.#notify(period, url)
+    await this.#setRetryTriggerStatus(false)
   }
 
   async findByPeriod (period) {
@@ -55,6 +59,18 @@ class DLT {
       }
     }
     await axios.post(url, data)
+  }
+
+  async #setRetryTriggerStatus (enable) {
+    const params = {
+      Enable: enable ? 'OPEN' : 'CLOSE',
+      FunctionName: 'lottery',
+      TriggerName: 'dlt-retry',
+      Type: 'timer',
+      Qualifier: '$DEFAULT',
+      Namespace: 'chore'
+    }
+    await tencentcloud.scfUpdateTriggerStatus(params)
   }
 }
 
