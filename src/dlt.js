@@ -2,47 +2,68 @@ const axios = require('axios')
 const { executeQuery } = require('./mysql')
 const tencentcloud = require('./tencent.cloud')
 
+const isToday = (date) => {
+  const today = new Date()
+  return date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+}
+
+const isNotLotteryDay = (date) => {
+  const day = date.getDay()
+  return day !== 1 && day !== 3 && day !== 6
+}
+
 class DLT {
   async sync () {
-    const { drawPdfUrl, lotteryDrawNum, lotteryDrawResult, lotteryDrawTime } = await this.#getLotteryData()
-    const data = await this.findByPeriod(lotteryDrawNum)
-
-    if (data) {
-      // 防止多次触发
-      await this.#setRetryTriggerStatus(false)
-      return
+    if (isNotLotteryDay(new Date())) {
+      return this.#setRetryTriggerStatus(false)
     }
 
-    const period = lotteryDrawNum
-    const result = lotteryDrawResult
-    const time = lotteryDrawTime
-    const url = drawPdfUrl
+    const [latestData, persistentData] = await Promise.all([
+      this.#getLatestData(),
+      this.#findLatestPersistentData()
+    ])
+
+    if (!isToday(latestData.time)) {
+      return this.#setRetryTriggerStatus(true)
+    }
+
+    if (latestData.period === persistentData.period) {
+      return this.#setRetryTriggerStatus(false)
+    }
+
+    const { period, result, time, url } = latestData
 
     if (!period || !result || !time || !url) {
-      await this.#setRetryTriggerStatus(true)
-      return
+      return this.#setRetryTriggerStatus(true)
     }
 
-    await this.create(period, result, time, url)
+    await this.#create(period, result, time, url)
     await this.#notify(period, url)
     await this.#setRetryTriggerStatus(false)
   }
 
-  async findByPeriod (period) {
-    const query = 'SELECT * FROM dlt WHERE period = ?'
-    const result = await executeQuery(query, [period])
+  async #findLatestPersistentData () {
+    const query = 'SELECT * FROM dlt ORDER BY period DESC LIMIT 1'
+    const result = await executeQuery(query)
     return result[0] ?? null
   }
 
-  async create (period, result, time, url) {
+  async #create (period, result, time, url) {
     const query = 'INSERT INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)'
     await executeQuery(query, [period, result, time, url])
   }
 
-  async #getLotteryData () {
+  async #getLatestData () {
     const url = 'https://webapi.sporttery.cn/gateway/lottery/getDigitalDrawInfoV1.qry?param=85,0&isVerify=1'
     const { data: { value: { dlt } } } = await axios.get(url)
-    return dlt
+    return {
+      period: dlt.lotteryDrawNum,
+      result: dlt.lotteryDrawResult,
+      time: new Date(dlt.lotteryDrawTime),
+      url: dlt.drawPdfUrl
+    }
   }
 
   async #notify (period, resultUrl) {
