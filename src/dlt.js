@@ -17,6 +17,7 @@ const isNotLotteryDay = (date) => {
 class DLT {
   async sync () {
     if (isNotLotteryDay(new Date())) {
+      console.log('Not lottery day')
       return this.#setRetryTriggerStatus(false)
     }
 
@@ -26,22 +27,26 @@ class DLT {
     ])
 
     if (!isToday(latestData.time)) {
+      console.log('Not today')
       return this.#setRetryTriggerStatus(true)
     }
 
     if (latestData.period === persistentData.period) {
+      console.log('Already synced')
       return this.#setRetryTriggerStatus(false)
     }
 
     const { period, result, time, url } = latestData
 
     if (!period || !result || !time || !url) {
+      console.log('Data incomplete')
       return this.#setRetryTriggerStatus(true)
     }
 
     await this.#create(period, result, time, url)
     await this.#notify(period, url)
     await this.#setRetryTriggerStatus(false)
+    console.log('Synced')
   }
 
   async #findLatestPersistentData () {
