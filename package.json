@@ -3,21 +3,25 @@
   "version": "1.0.0",
   "description": "大乐透中奖查询",
   "scripts": {
-    "build": "node ./eng/build.js",
-    "build:layer": "./eng/layer/build.sh"
+    "prepare": "husky",
+    "commitlint": "commitlint --config ./config/.commitlintrc.json --edit",
+    "eslint": "eslint --config ./config/eslint.config.js --fix .",
+    "cspell": "cspell --config ./config/cspell.config.json .",
+    "lint-staged": "lint-staged --config ./config/.lintstagedrc.json"
   },
   "dependencies": {
-    "axios": "^1.1.2",
-    "mysql2": "^3.2.3",
-    "tencentcloud-sdk-nodejs": "^4.0.586"
+    "axios": "^1.6.8",
+    "mysql2": "^3.9.4"
   },
   "devDependencies": {
-    "esbuild": "^0.17.17",
-    "eslint": "^8.39.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-n": "^15.7.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "jszip": "^3.10.1"
+    "@commitlint/cli": "^19.2.2",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@eslint/js": "^9.0.0",
+    "@stylistic/eslint-plugin": "^1.7.2",
+    "cspell": "^8.7.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2"
   }
 }

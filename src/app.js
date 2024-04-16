@@ -1,11 +1,7 @@
-const dlt = require('./dlt')
+const dlt = require("./dlt");
 
 const start = async () => {
-  await dlt.sync()
-}
+  await dlt.sync();
+};
 
-if (process.env.NODE_ENV === 'development') {
-  start()
-}
-
-exports.start = start
+start();

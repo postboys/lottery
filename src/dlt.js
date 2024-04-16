@@ -1,103 +1,77 @@
-const axios = require('axios')
-const { executeQuery } = require('./mysql')
-const tencentcloud = require('./tencent.cloud')
-
-const isToday = (date) => {
-  const today = new Date()
-  return date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-}
-
-const isNotLotteryDay = (date) => {
-  const day = date.getDay()
-  return day !== 1 && day !== 3 && day !== 6
-}
+const axios = require("axios");
+const { executeQuery } = require("./mysql");
+const { isLotteryDay, isToday } = require("./util");
 
 class DLT {
-  async sync () {
-    if (isNotLotteryDay(new Date())) {
-      console.log('Not lottery day')
-      return this.#setRetryTriggerStatus(false)
+  async sync() {
+    if (!isLotteryDay(new Date())) {
+      console.log("不是大乐透开奖日");
+      return;
     }
 
     const [latestData, persistentData] = await Promise.all([
       this.#getLatestData(),
-      this.#findLatestPersistentData()
-    ])
+      this.#findLatestPersistentData(),
+    ]);
 
     if (!isToday(latestData.time)) {
-      console.log('Not today')
-      return this.#setRetryTriggerStatus(true)
+      console.log("最新数据不是当天数据");
+      return;
     }
 
     if (latestData.period === persistentData.period) {
-      console.log('Already synced')
-      return this.#setRetryTriggerStatus(false)
+      console.log("数据已同步");
+      return;
     }
 
-    const { period, result, time, url } = latestData
+    const { period, result, time, url } = latestData;
 
     if (!period || !result || !time || !url) {
-      console.log('Data incomplete')
-      return this.#setRetryTriggerStatus(true)
+      console.log("数据不完整");
     }
 
-    await this.#create(period, result, time, url)
-    await this.#notify(period, url)
-    await this.#setRetryTriggerStatus(false)
-    console.log('Synced')
+    await this.#create(period, result, time, url);
+    await this.#notify(period, url);
+    console.log("数据同步完成");
   }
 
-  async #findLatestPersistentData () {
-    const query = 'SELECT * FROM dlt ORDER BY period DESC LIMIT 1'
-    const result = await executeQuery(query)
-    return result[0] ?? null
+  async #findLatestPersistentData() {
+    const query = "SELECT * FROM dlt ORDER BY period DESC LIMIT 1";
+    const result = await executeQuery(query);
+    return result[0] ?? null;
   }
 
-  async #create (period, result, time, url) {
-    const query = 'INSERT INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)'
-    await executeQuery(query, [period, result, time, url])
+  async #create(period, result, time, url) {
+    const query = "INSERT INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
+    await executeQuery(query, [period, result, time, url]);
   }
 
-  async #getLatestData () {
-    const url = 'https://webapi.sporttery.cn/gateway/lottery/getDigitalDrawInfoV1.qry?param=85,0&isVerify=1'
-    const { data: { value: { dlt } } } = await axios.get(url)
+  async #getLatestData() {
+    const url = "https://webapi.sporttery.cn/gateway/lottery/getDigitalDrawInfoV1.qry?param=85,0&isVerify=1";
+    const { data: { value: { dlt } } } = await axios.get(url);
     return {
       period: dlt.lotteryDrawNum,
       result: dlt.lotteryDrawResult,
       time: new Date(dlt.lotteryDrawTime),
-      url: dlt.drawPdfUrl
-    }
+      url: dlt.drawPdfUrl,
+    };
   }
 
-  async #notify (period, resultUrl) {
-    const url = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5eaae123-d524-47c0-a932-3a1e5e850818'
+  async #notify(period, resultUrl) {
+    const url = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5eaae123-d524-47c0-a932-3a1e5e850818";
     const data = {
-      msgtype: 'news',
+      msgtype: "news",
       news: {
         articles: [{
           title: `大乐透第${period}期已开奖`,
-          description: '点击查看开奖详情',
+          description: "点击查看开奖详情",
           url: resultUrl,
-          picurl: 'https://static.sporttery.cn/res_1_0/tcw/upload/202205/logo_dlt.png'
-        }]
-      }
-    }
-    await axios.post(url, data)
-  }
-
-  async #setRetryTriggerStatus (enable) {
-    const params = {
-      Enable: enable ? 'OPEN' : 'CLOSE',
-      FunctionName: 'lottery',
-      TriggerName: 'dlt-retry',
-      Type: 'timer',
-      Qualifier: '$DEFAULT',
-      Namespace: 'chore'
-    }
-    await tencentcloud.scfUpdateTriggerStatus(params)
+          picurl: "https://static.sporttery.cn/res_1_0/tcw/upload/202205/logo_dlt.png",
+        }],
+      },
+    };
+    await axios.post(url, data);
   }
 }
 
-module.exports = new DLT()
+module.exports = new DLT();

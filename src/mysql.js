@@ -1,4 +1,4 @@
-const mysql = require('mysql2/promise')
+const mysql = require("mysql2/promise");
 
 const pool = mysql.createPool({
   host: process.env.DATABASE_HOST,
@@ -8,20 +8,21 @@ const pool = mysql.createPool({
   database: process.env.DATABASE_NAME,
   waitForConnections: true,
   connectionLimit: 5,
-  queueLimit: 0
-})
+  queueLimit: 0,
+});
 
 const executeQuery = async (query, params) => {
   try {
-    const conn = await pool.getConnection()
-    const result = await conn.query(query, params)
-    conn.release()
-    return result[0] // 输出查询结果
-  } catch (err) {
-    throw new Error(err)
+    const conn = await pool.getConnection();
+    const result = await conn.query(query, params);
+    conn.release();
+    return result[0]; // 输出查询结果
   }
-}
+  catch (err) {
+    throw new Error(err);
+  }
+};
 
 module.exports = {
-  executeQuery
-}
+  executeQuery,
+};
