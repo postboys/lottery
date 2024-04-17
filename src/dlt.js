@@ -35,7 +35,13 @@ class DLT {
     }
 
     await this.#create(period, result, time, url);
-    await this.#notify(period, url);
+
+    if (process.env.NODE_ENV === "production") {
+      await this.#notify(period, url);
+    }
+    else {
+      console.log("消息发送成功");
+    }
     console.log("数据同步完成");
   }
 
