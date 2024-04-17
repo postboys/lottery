@@ -1,5 +1,3 @@
 node_modules/
-last
-log
-*.zip
 *.env
+/index.js

@@ -1,6 +1,6 @@
 {
   "cSpell.import": [
-    "./config/cspell.config.json"
+    "./eng/cspell.config.json"
   ],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
@@ -12,7 +12,7 @@
     120
   ],
   "eslint.options": {
-    "overrideConfigFile": "./config/eslint.config.js",
+    "overrideConfigFile": "./eng/eslint.config.js",
   },
   "files.insertFinalNewline": true,
   "typescript.tsdk": "node_modules/typescript/lib",
