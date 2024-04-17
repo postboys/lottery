@@ -5,22 +5,26 @@ const { isLotteryDay, isToday } = require("./util");
 class DLT {
   async sync() {
     if (!isLotteryDay(new Date())) {
-      console.log("不是大乐透开奖日");
+      console.log("今天不是大乐透开奖日");
       return;
     }
 
-    const [latestData, persistentData] = await Promise.all([
-      this.#getLatestData(),
-      this.#findLatestPersistentData(),
-    ]);
+    const persistentData = await this.#findLatestPersistentData();
+
+    if (isToday(persistentData.time)) {
+      console.log("今日数据已同步");
+      return;
+    }
+
+    const latestData = await this.#getLatestData();
 
     if (!isToday(latestData.time)) {
-      console.log("最新数据不是当天数据");
+      console.log("服务器返回数据不是今天数据");
       return;
     }
 
     if (latestData.period === persistentData.period) {
-      console.log("数据已同步");
+      console.log("今日数据已同步");
       return;
     }
 
