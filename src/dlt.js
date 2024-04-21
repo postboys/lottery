@@ -6,32 +6,28 @@ class DLT {
   async sync() {
     if (!isLotteryDay(new Date())) {
       console.log("今天不是大乐透开奖日");
-      return;
+      return true;
     }
 
     const persistentData = await this.#findLatestPersistentData();
 
     if (isToday(persistentData.time)) {
       console.log("今日数据已同步");
-      return;
+      return true;
     }
 
     const latestData = await this.#getLatestData();
 
     if (!isToday(latestData.time)) {
       console.log("服务器返回数据不是今天数据");
-      return;
-    }
-
-    if (latestData.period === persistentData.period) {
-      console.log("今日数据已同步");
-      return;
+      return false;
     }
 
     const { period, result, time, url } = latestData;
 
     if (!period || !result || !time || !url) {
       console.log("数据不完整");
+      return false;
     }
 
     await this.#create(period, result, time, url);
@@ -43,6 +39,7 @@ class DLT {
       console.log("消息发送成功");
     }
     console.log("数据同步完成");
+    return true;
   }
 
   async #findLatestPersistentData() {
