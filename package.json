@@ -18,12 +18,10 @@
   "devDependencies": {
     "@commitlint/cli": "^19.2.2",
     "@commitlint/config-conventional": "^19.2.2",
-    "@eslint/js": "^9.0.0",
-    "@stylistic/eslint-plugin": "^1.7.2",
+    "@pikadun/eslint-config": "^0.0.3",
     "cspell": "^8.7.0",
     "esbuild": "0.20.2",
     "eslint": "^9.0.0",
-    "globals": "^15.0.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2"
   }
