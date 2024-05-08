@@ -3,30 +3,28 @@ const eslint = require("@eslint/js");
 const globals = require("globals");
 
 const customized = stylistic.configs.customize({
-  jsx: false,
-  semi: true,
-  quotes: "double",
+    jsx: false,
+    semi: true,
+    quotes: "double",
+    indent: 4,
 });
 
 /** @type {import("eslint").Linter.FlatConfig[]} */
 const config = [
-  {
-    ignores: ["lib/**"],
-  },
-  {
-    rules: {
-      ...eslint.configs.recommended.rules,
-      ...customized.rules,
+    {
+        rules: {
+            ...eslint.configs.recommended.rules,
+            ...customized.rules,
+        },
+        plugins: {
+            "@stylistic": stylistic,
+        },
+        languageOptions: {
+            globals: {
+                ...globals.node,
+            },
+        },
     },
-    plugins: {
-      "@stylistic": stylistic,
-    },
-    languageOptions: {
-      globals: {
-        ...globals.node,
-      },
-    },
-  },
 
 ];
 
