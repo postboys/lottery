@@ -2,18 +2,7 @@
   "cSpell.import": [
     "./eng/cspell.config.json"
   ],
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit"
-  },
-  "editor.defaultFormatter": null,
-  "editor.formatOnSave": true,
-  "editor.rulers": [
-    120
-  ],
   "eslint.options": {
     "overrideConfigFile": "./eng/eslint.config.js",
-  },
-  "files.insertFinalNewline": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
+  }
 }
