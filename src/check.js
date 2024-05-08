@@ -1,5 +1,27 @@
 const mysql = require("./mysql");
 
+const rule = {
+    0: {
+        3: 9,
+        4: 7,
+        5: 3,
+    },
+    1: {
+        2: 9,
+        3: 8,
+        4: 5,
+        5: 2,
+    },
+    2: {
+        0: 9,
+        1: 9,
+        2: 8,
+        3: 6,
+        4: 4,
+        5: 1,
+    },
+};
+
 const dodo = async () => {
     const sql = "SELECT * FROM dlt ORDER BY period DESC LIMIT 15";
     const data = await mysql.executeQuery(sql);
@@ -14,8 +36,9 @@ const dodo = async () => {
         const arr5 = arr1.filter(v => arr3.includes(v));
         const arr6 = arr2.filter(v => arr4.includes(v));
 
-        if (arr5.length + arr6.length > 2) {
-            console.log(item.period, arr5, arr6);
+        const rewards = rule[arr6.length][arr5.length];
+        if (rewards) {
+            console.log(item.time.toLocaleDateString(), item.period, arr5, arr6, rewards);
         }
     }
 };
