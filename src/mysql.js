@@ -9,14 +9,13 @@ const config = {
 };
 
 const executeQuery = async (query, params) => {
+  const connection = await mysql.createConnection(config);
   try {
-    const connection = await mysql.createConnection(config);
     const result = await connection.query(query, params);
-    connection.destroy();
     return result[0]; // 输出查询结果
   }
-  catch (err) {
-    throw new Error(err);
+  finally {
+    connection.destroy();
   }
 };
 
