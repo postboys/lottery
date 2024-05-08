@@ -1,3 +1,7 @@
-const configs = require("@pikadun/eslint-config/js");
+const common = require("@pikadun/eslint-config/common");
+const js = require("@pikadun/eslint-config/js");
 
-module.exports = configs;
+module.exports = [
+    ...common,
+    ...js,
+];
