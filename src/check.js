@@ -22,8 +22,15 @@ const rule = {
     },
 };
 
-const dodo = async () => {
-    const sql = "SELECT * FROM dlt ORDER BY period DESC LIMIT 15";
+const dodo = async (fromPeriod) => {
+    let sql = "SELECT * FROM dlt";
+
+    if (fromPeriod) {
+        sql += ` WHERE period >= ${fromPeriod}`;
+    }
+
+    sql += " ORDER BY period DESC LIMIT 15";
+
     const data = await mysql.executeQuery(sql);
     const arr1 = ["01", "08", "09", "21", "33"];
     const arr2 = ["03", "05"];
@@ -41,6 +48,8 @@ const dodo = async () => {
             console.log(item.time.toLocaleDateString(), item.period, arr5, arr6, rewards);
         }
     }
+
+    console.log(`Total: ${data.length}`);
 };
 
-dodo();
+dodo(process.argv.slice(2)[0]);
