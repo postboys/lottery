@@ -1,11 +1,11 @@
 const mysql = require("mysql2/promise");
 
 const config = {
+    database: process.env.DATABASE_NAME,
     host: process.env.DATABASE_HOST,
+    password: process.env.DATABASE_PASSWORD,
     port: process.env.DATABASE_PORT,
     user: process.env.DATABASE_USERNAME,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE_NAME,
 };
 
 const executeQuery = async (query, params) => {
@@ -19,6 +19,4 @@ const executeQuery = async (query, params) => {
     }
 };
 
-module.exports = {
-    executeQuery,
-};
+module.exports = { executeQuery };

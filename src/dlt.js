@@ -69,12 +69,14 @@ class DLT {
         const data = {
             msgtype: "news",
             news: {
-                articles: [{
-                    title: `大乐透第${period}期已开奖`,
-                    description: "点击查看开奖详情",
-                    url: resultUrl,
-                    picurl: "https://static.sporttery.cn/res_1_0/tcw/upload/202205/logo_dlt.png",
-                }],
+                articles: [
+                    {
+                        description: "点击查看开奖详情",
+                        picurl: "https://static.sporttery.cn/res_1_0/tcw/upload/202205/logo_dlt.png",
+                        title: `大乐透第${period}期已开奖`,
+                        url: resultUrl,
+                    },
+                ],
             },
         };
         await axios.post(url, data);

@@ -11,6 +11,6 @@ const isLotteryDay = (date) => {
 };
 
 module.exports = {
-    isToday,
     isLotteryDay,
+    isToday,
 };

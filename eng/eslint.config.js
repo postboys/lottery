@@ -1,7 +1,11 @@
-const common = require("@pikadun/eslint-config/common");
-const js = require("@pikadun/eslint-config/js");
+const common = require("@camaro/eslint-config");
+const globals = require("globals");
 
+/** @type {import('eslint').Linter.FlatConfig[]} */
 module.exports = [
     ...common,
-    ...js,
+    {
+        files: ["eng/**/*.js", "src/**/*.js"],
+        languageOptions: { globals: { ...globals.node } },
+    },
 ];
