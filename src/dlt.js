@@ -3,7 +3,7 @@ const { executeQuery } = require("./mysql");
 const { isLotteryDay, isToday } = require("./util");
 
 class DLT {
-    async sync() {
+    async syncLatest() {
         if (!isLotteryDay(new Date())) {
             console.log("今天不是大乐透开奖日");
             return true;
@@ -42,6 +42,14 @@ class DLT {
         return true;
     }
 
+    async syncHistory() {
+        const list = await this.#getHistoryList();
+        for (const item of list) {
+            await this.#create(item.period, item.result, item.time, item.url);
+            console.log(`同步历史数据: ${item.period}`);
+        }
+    }
+
     async #findLatestPersistentData() {
         const query = "SELECT * FROM dlt ORDER BY period DESC LIMIT 1";
         const result = await executeQuery(query);
@@ -62,6 +70,20 @@ class DLT {
             time: new Date(dlt.lotteryDrawTime),
             url: dlt.drawPdfUrl,
         };
+    }
+
+    async #getHistoryList() {
+        const url = "https://webapi.sporttery.cn/gateway/lottery/getHistoryPageListV1.qry?gameNo=85&provinceId=0&pageSize=30&isVerify=1&pageNo=1";
+        const { data: { value: { list } } } = await axios.get(url);
+
+        return list.map((item) => {
+            return {
+                period: item.lotteryDrawNum,
+                result: item.lotteryDrawResult,
+                time: new Date(item.lotteryDrawTime),
+                url: item.drawPdfUrl,
+            };
+        });
     }
 
     async #notify(period, resultUrl) {
