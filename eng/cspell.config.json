@@ -5,9 +5,11 @@
   },
   "useGitignore": true,
   "words": [
+    "approle",
     "camaro",
     "commitlint",
     "commitlintrc",
+    "creds",
     "endregion",
     "lintstagedrc",
     "msgtype",

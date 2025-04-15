@@ -1,14 +1,19 @@
 const mysql = require("mysql2/promise");
+const { getDatabaseCredential } = require("./vault");
+const config = require("./config");
 
-const config = {
-    database: process.env.DATABASE_NAME,
-    host: process.env.DATABASE_HOST,
-    password: process.env.DATABASE_PASSWORD,
-    port: process.env.DATABASE_PORT,
-    user: process.env.DATABASE_USERNAME,
+const getMysqlConfig = async () => {
+    const credential = await getDatabaseCredential(config.mysql.database);
+
+    return {
+        ...config.mysql,
+        password: credential.password,
+        user: credential.username,
+    };
 };
 
 const executeQuery = async (query, params) => {
+    const config = await getMysqlConfig();
     const connection = await mysql.createConnection(config);
     try {
         const result = await connection.query(query, params);

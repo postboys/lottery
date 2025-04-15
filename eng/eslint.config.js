@@ -1,7 +1,7 @@
 const common = require("@camaro/eslint-config");
 const globals = require("globals");
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
+/** @type {import('eslint').Linter.Config[]} */
 module.exports = [
     ...common,
     {
