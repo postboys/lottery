@@ -1,27 +1,30 @@
-const axios = require("axios");
-const { executeQuery } = require("./mysql");
-const { isLotteryDay, isToday } = require("./util");
+import AxiosFactory from "axios";
+import { executeQuery } from "./mysql";
+import { isLotteryDay, isToday } from "./util";
 
-class DLT {
+const axios = AxiosFactory.create({ baseURL: "https://webapi.sporttery.cn/gateway/lottery" });
+export interface DLTData {
+    period: string;
+    result: string;
+    time: Date;
+    url: string;
+}
+
+export default class DLT {
     async syncLatest() {
         if (!isLotteryDay(new Date())) {
             console.log("今天不是大乐透开奖日");
             return true;
         }
 
-        const persistentData = await this.#findLatestPersistentData();
+        const existsData = await this.#findLatestExistsData();
 
-        if (isToday(persistentData.time)) {
+        if (existsData && isToday(existsData.time)) {
             console.log("今日数据已同步");
             return true;
         }
 
         const latestData = await this.#getLatestData();
-
-        if (!isToday(latestData.time)) {
-            console.log("服务器返回数据不是今天数据");
-            return false;
-        }
 
         const { period, result, time, url } = latestData;
 
@@ -30,10 +33,16 @@ class DLT {
             return false;
         }
 
-        await this.#create(period, result, time, url);
+        if (!isToday(time)) {
+            console.log("服务器返回数据不是今天数据");
+            return false;
+        }
+
+        const data = { period, result, time, url };
+        await this.#create(data);
 
         if (process.env.NODE_ENV === "production") {
-            await this.#notify(period, url);
+            await this.#notify(data);
         }
         else {
             console.log("消息发送成功");
@@ -45,36 +54,52 @@ class DLT {
     async syncHistory() {
         const list = await this.#getHistoryList();
         for (const item of list) {
-            await this.#create(item.period, item.result, item.time, item.url);
+            await this.#create(item);
             console.log(`同步历史数据: ${item.period}`);
         }
     }
 
-    async #findLatestPersistentData() {
+    async #findLatestExistsData() {
         const query = "SELECT * FROM dlt ORDER BY period DESC LIMIT 1";
-        const result = await executeQuery(query);
-        return result[0] ?? null;
+        const result = await executeQuery<DLTData[]>(query);
+        return result.at(0);
     }
 
-    async #create(period, result, time, url) {
+    async #create(dlt: DLTData) {
         const query = "INSERT INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
-        await executeQuery(query, [period, result, time, url]);
+        await executeQuery(query, [dlt.period, dlt.result, dlt.time, dlt.url]);
     }
 
     async #getLatestData() {
-        const url = "https://webapi.sporttery.cn/gateway/lottery/getDigitalDrawInfoV1.qry?param=85,0&isVerify=1";
-        const { data: { value: { dlt } } } = await axios.get(url);
+        const { data: { value: { dlt } } } = await axios.get<{
+            value: {
+                dlt: {
+                    lotteryDrawNum?: string;
+                    lotteryDrawResult?: string;
+                    lotteryDrawTime?: string;
+                    drawPdfUrl?: string;
+                };
+            };
+        }>("getDigitalDrawInfoV1.qry?param=85,0&isVerify=1");
         return {
             period: dlt.lotteryDrawNum,
             result: dlt.lotteryDrawResult,
-            time: new Date(dlt.lotteryDrawTime),
+            time: dlt.lotteryDrawTime ? new Date(dlt.lotteryDrawTime) : null,
             url: dlt.drawPdfUrl,
         };
     }
 
     async #getHistoryList() {
-        const url = "https://webapi.sporttery.cn/gateway/lottery/getHistoryPageListV1.qry?gameNo=85&provinceId=0&pageSize=30&isVerify=1&pageNo=1";
-        const { data: { value: { list } } } = await axios.get(url);
+        const { data: { value: { list } } } = await axios.get<{
+            value: {
+                list: {
+                    lotteryDrawNum: string;
+                    lotteryDrawResult: string;
+                    lotteryDrawTime: string;
+                    drawPdfUrl: string;
+                }[];
+            };
+        }>("getHistoryPageListV1.qry?gameNo=85&provinceId=0&pageSize=30&isVerify=1&pageNo=1");
 
         return list.map((item) => {
             return {
@@ -86,7 +111,7 @@ class DLT {
         });
     }
 
-    async #notify(period, resultUrl) {
+    async #notify(dlt: DLTData) {
         const url = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=5eaae123-d524-47c0-a932-3a1e5e850818";
         const data = {
             msgtype: "news",
@@ -95,8 +120,8 @@ class DLT {
                     {
                         description: "点击查看开奖详情",
                         picurl: "https://static.sporttery.cn/res_1_0/tcw/upload/202205/logo_dlt.png",
-                        title: `大乐透第${period}期已开奖`,
-                        url: resultUrl,
+                        title: `大乐透第${dlt.period}期已开奖`,
+                        url: dlt.url,
                     },
                 ],
             },
@@ -104,5 +129,3 @@ class DLT {
         await axios.post(url, data);
     }
 }
-
-module.exports = new DLT();

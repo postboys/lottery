@@ -1,6 +1,7 @@
-const mysql = require("./mysql");
+import { DLTData } from "./dlt";
+import { executeQuery } from "./mysql";
 
-const rule = {
+const rule: Record<number, Record<number, number>> = {
     0: {
         3: 9,
         4: 7,
@@ -22,16 +23,16 @@ const rule = {
     },
 };
 
-const dodo = async (fromPeriod) => {
+const dodo = async (fromPeriod?: string) => {
     let sql = "SELECT * FROM dlt";
 
     if (fromPeriod) {
-        sql += ` WHERE period >= ${fromPeriod}`;
+        sql += ` WHERE period >= '${fromPeriod}'`;
     }
 
     sql += " ORDER BY period DESC LIMIT 15";
 
-    const data = await mysql.executeQuery(sql);
+    const data = await executeQuery<DLTData[]>(sql);
     const arr1 = ["01", "08", "09", "21", "33"];
     const arr2 = ["03", "05"];
 
@@ -43,13 +44,15 @@ const dodo = async (fromPeriod) => {
         const arr5 = arr1.filter(v => arr3.includes(v));
         const arr6 = arr2.filter(v => arr4.includes(v));
 
-        const rewards = rule[arr6.length][arr5.length];
+        const rewards = rule[arr6.length]?.[arr5.length];
         if (rewards) {
             console.log(item.time.toLocaleDateString(), item.period, arr5, arr6, rewards);
         }
     }
 
-    console.log(`Total: ${data.length}`);
+    console.log(`Total: ${data.length.toString()}`);
 };
 
-dodo(process.argv.slice(2)[0]);
+dodo(process.argv.slice(2)[0]).catch((error: unknown) => {
+    console.log(error);
+});

@@ -1,11 +1,12 @@
-const common = require("@camaro/eslint-config");
+const typescript = require("@camaro/eslint-config/ts");
 const globals = require("globals");
 
 /** @type {import('eslint').Linter.Config[]} */
 module.exports = [
-    ...common,
+    ...typescript,
+    { ignores: ["lib/**", "out/**"] },
     {
-        files: ["eng/**/*.js", "src/**/*.js"],
+        files: ["eng/**/*.js"],
         languageOptions: { globals: { ...globals.node } },
     },
 ];
