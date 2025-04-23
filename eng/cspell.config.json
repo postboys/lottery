@@ -16,6 +16,7 @@
     "outdir",
     "outfile",
     "picurl",
-    "pikadun"
+    "pikadun",
+    "prebuild"
   ]
 }
