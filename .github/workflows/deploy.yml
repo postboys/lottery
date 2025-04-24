@@ -9,4 +9,4 @@ on:
 
 jobs:
   build:
-    uses: postboys/workflows/build.yml
+    uses: postboys/workflows/build.yml@main
