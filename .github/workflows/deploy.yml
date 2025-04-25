@@ -8,7 +8,5 @@ on:
       - staging
 
 jobs:
-  test:
-    run: echo 123
   build:
     uses: postboys/workflows/.github/workflows/build-nodejs.yml@main
