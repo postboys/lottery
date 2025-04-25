@@ -8,11 +8,6 @@ on:
       - staging
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo ${{ secrets.SSH_HOST }}
-    
   build:
     uses: postboys/workflows/.github/workflows/build-nodejs.yml@main
   
