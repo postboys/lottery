@@ -8,11 +8,7 @@ on:
       - staging
 
 jobs:
-  dummy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Just a placeholder
-        run: echo "This enables the manual trigger button."
-  
+  test:
+    run: echo 123
   build:
     uses: postboys/workflows/.github/workflows/build-nodejs.yml@main
