@@ -10,7 +10,7 @@ module.exports = {
                 ...SECRET_ENV_VARS,
 
                 DATABASE_NAME: APP_ENV,
-                DATABASE_USERNAME: APP_ENV,
+                DATABASE_USER: APP_ENV,
             },
 
             cron_restart: "00 22 * * 1,3,6",
