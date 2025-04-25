@@ -14,3 +14,4 @@ jobs:
   deploy:
     needs: build
     uses: postboys/workflows/.github/workflows/deploy.yml@main
+    secrets: inherit
