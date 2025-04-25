@@ -10,3 +10,4 @@ on:
 jobs:
   deploy:
     uses: postboys/workflows/.github/workflows/build-nodejs.yml@main
+    uses: postboys/workflows/.github/workflows/deploy.yml@main
