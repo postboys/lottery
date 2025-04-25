@@ -8,6 +8,9 @@ on:
       - staging
 
 jobs:
-  deploy:
+  build:
     uses: postboys/workflows/.github/workflows/build-nodejs.yml@main
+  
+  deploy:
+    needs: build
     uses: postboys/workflows/.github/workflows/deploy.yml@main
