@@ -43,9 +43,10 @@ export default class DLT {
 
         if (process.env.NODE_ENV === "production") {
             await this.#notify(data);
+            console.log("消息发送成功");
         }
         else {
-            console.log("消息发送成功");
+            console.log("跳过消息发送");
         }
         console.log("数据同步完成");
         return true;
@@ -66,7 +67,7 @@ export default class DLT {
     }
 
     async #create(dlt: DLTData) {
-        const query = "INSERT INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
+        const query = "INSERT IGNORE INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
         await executeQuery(query, [dlt.period, dlt.result, dlt.time, dlt.url]);
     }
 
