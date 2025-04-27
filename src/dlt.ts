@@ -67,7 +67,7 @@ export default class DLT {
     }
 
     async #create(dlt: DLTData) {
-        const query = "INSERT INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
+        const query = "INSERT IGNORE INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
         await executeQuery(query, [dlt.period, dlt.result, dlt.time, dlt.url]);
     }
 
