@@ -1,3 +1,6 @@
+import axios from "axios";
+import config from "./config";
+
 export const isToday = (date: Date) => {
     const today = new Date();
     return date.getFullYear() === today.getFullYear()
@@ -5,7 +8,9 @@ export const isToday = (date: Date) => {
         && date.getDate() === today.getDate();
 };
 
-export const isLotteryDay = (date: Date) => {
-    const day = date.getDay();
-    return day === 1 || day === 3 || day === 6;
+export const notify = async (message: unknown) => {
+    if (config.notifyKey) {
+        const url = `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=${config.notifyKey}`;
+        await axios.post(url, message);
+    }
 };

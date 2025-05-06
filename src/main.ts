@@ -1,23 +1,12 @@
 import { CronJob } from "cron";
-import DLT from "./dlt";
+import config from "./config";
+import DLTService from "./dlt.service";
 
-const dlt = new DLT();
+const dltCronTime = `${config.dlt.drawMinute.toString()} ${config.dlt.drawHour.toString()} * * ${config.dlt.drawDay.join(",")}`;
+const dltJob = new CronJob(dltCronTime, async () => {
+    await new DLTService().sync();
 
-const sync = () => {
-    const dltJob = new CronJob("*/5 * * * *", async () => {
-        const success = await dlt.syncLatest();
+    await dltJob.stop();
+}, null, null, undefined, undefined, true);
 
-        if (success) {
-            dltJob.stop()?.catch((error: unknown) => {
-                console.log(error);
-            });
-        }
-    }, null, null, null, null, true);
-    dltJob.start();
-};
-
-sync();
-
-// dlt.syncHistory().catch((e: unknown) => {
-//     console.log(e);
-// });
+dltJob.start();
