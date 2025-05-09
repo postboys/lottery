@@ -15,14 +15,17 @@ export default class DLTService implements ILotteryService {
             if (isToday(data.time)) {
                 await this.#create(data);
                 await this.#sendNotification(data);
+                console.log("大乐透开奖数据已更新", data.period, data.result, data.time.toLocaleDateString());
                 return data;
             }
             else {
+                console.log("开奖数据不在今天内", data.time.toLocaleDateString());
                 await setTimeout(config.dlt.checkInterval);
                 return this.sync();
             }
         }
 
+        console.log("当前时间不在开奖时间内");
         return null;
     }
 
