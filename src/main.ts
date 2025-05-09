@@ -6,7 +6,7 @@ const dltCronTime = `${config.dlt.drawMinute.toString()} ${config.dlt.drawHour.t
 const dltJob = new CronJob(dltCronTime, async () => {
     await new DLTService().sync();
 
-    await dltJob.stop();
+    console.log(`Next DLT draw scheduled at ${dltJob.nextDates().toString()}`);
 }, null, null, undefined, undefined, true);
 
 dltJob.start();
