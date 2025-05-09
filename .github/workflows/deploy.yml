@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     uses: postboys/workflows/.github/workflows/build-nodejs.yml@main
+    with:
+      path-to-artifact: |
+        lib/**/*.js
+        eng/ecosystem.config.js
   
   deploy:
     needs: build

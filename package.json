@@ -4,7 +4,7 @@
   "description": "A lottery application",
   "scripts": {
     "build": "TSX_TSCONFIG_PATH=./scripts/tsconfig.json tsx ./scripts/build.ts",
-    "check": "tsx --env-file=.env ./src/check.ts",
+    "check": "tsx --env-file=.env ./src/cli.ts",
     "commitlint": "commitlint --config ./eng/.commitlintrc.json --edit",
     "cspell": "cspell --config ./eng/cspell.config.json --quiet .",
     "eslint": "eslint --config ./eng/eslint.config.js .",
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "commander": "^13.1.0",
     "cron": "^4.3.0",
     "mysql2": "^3.14.0"
   }
