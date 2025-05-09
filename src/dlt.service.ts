@@ -2,13 +2,13 @@ import AxiosFactory from "axios";
 import { setTimeout } from "timers/promises";
 import config from "./config";
 import { executeQuery } from "./mysql";
-import { DLTData, DLTRecord, ILotteryService } from "./types";
+import { DLTData, DLTEntity, ILotteryService } from "./types";
 import { isToday, notify } from "./util";
 
 export default class DLTService implements ILotteryService {
     private http = AxiosFactory.create({ baseURL: "https://webapi.sporttery.cn/gateway/lottery" });
 
-    async sync(): Promise<DLTRecord | null> {
+    async sync(): Promise<DLTEntity | null> {
         if (config.dlt.isDrawDateTime()) {
             const data = await this.#getLatestData();
 
@@ -26,7 +26,7 @@ export default class DLTService implements ILotteryService {
         return null;
     }
 
-    async syncHistory(periods = 15): Promise<DLTRecord[]> {
+    async syncHistory(periods = 15): Promise<DLTEntity[]> {
         const records = await this.#getHistoryData(periods);
 
         for (const item of records) {
@@ -45,7 +45,7 @@ export default class DLTService implements ILotteryService {
 
         sql += " ORDER BY period DESC LIMIT 15";
 
-        const data = await executeQuery<DLTRecord[]>(sql);
+        const data = await executeQuery<DLTEntity[]>(sql);
         const arr1 = numbers.slice(0, 5).map(v => v.toString().padStart(2, "0"));
         const arr2 = numbers.slice(5).map(v => v.toString().padStart(2, "0"));
 
@@ -64,12 +64,12 @@ export default class DLTService implements ILotteryService {
         }
     }
 
-    async #create(dlt: DLTRecord) {
+    async #create(dlt: DLTEntity) {
         const query = "INSERT IGNORE INTO dlt (period, result, time, url) VALUES (?, ?, ?, ?)";
         await executeQuery(query, [dlt.period, dlt.result, dlt.time, dlt.url]);
     }
 
-    async #getLatestData(): Promise<DLTRecord> {
+    async #getLatestData(): Promise<DLTEntity> {
         const url = "getDigitalDrawInfoV1.qry?param=85,0&isVerify=1";
         const result = await this.http.get<{ value: { dlt: DLTData } }>(url);
 
@@ -83,7 +83,7 @@ export default class DLTService implements ILotteryService {
         return result.data.value.list.map(item => this.#formatDLTData(item));
     }
 
-    #formatDLTData(data: DLTData): DLTRecord {
+    #formatDLTData(data: DLTData): DLTEntity {
         return {
             period: data.lotteryDrawNum,
             result: data.lotteryDrawResult,
@@ -92,7 +92,7 @@ export default class DLTService implements ILotteryService {
         };
     }
 
-    async #sendNotification(dlt: DLTRecord) {
+    async #sendNotification(dlt: DLTEntity) {
         const message = {
             msgtype: "news",
             news: {
